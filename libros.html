@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de usuarios</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Usuarios</h1>
+    <div>
+        <input type="text" id="idusuario" placeholder="Id. Usuario">
+        <input type="text" id="nomusuario" placeholder="Nombre">
+        <input type="text" id="dirusuario" placeholder="Direccion">
+        <input type="text" id="celular" placeholder="Telefono">
+         <input type="text" id="activo" placeholder="Activo">
+        <button onclick="crearUsuario()">Agregar</button>
+         <button onclick="buscarUsuario(document.getElementById('idusuario').value)">Buscar</button>
+          <button onclick="modificarUsuario()">Modificar</button>
+           <button onclick="eliminarUsuario()">Eliminar</button>
+    </div>
+    <div id="usuarioslist"></div>
+    <script>
+        const api = "http://localhost:8080/usuarios";
+
+        function getUsuarios() {
+            axios.get(api)
+                .then(response => {
+                    const list = document.getElementById("usuarioslist");
+                    list.innerHTML = "";
+                    response.data.forEach(usuario => {
+                        list.innerHTML += `
+                            <p>
+                                ${usuario.idusuario} - ${usuario.nomusuario} - ${usuario.dirusuario} - ${usuario.celular} - ${usuario.activo}
+                            </p>
+                        `;
+                    });
+                })
+                .catch(error => console.error("Error al obtener usuarios:", error));
+        }
+
+        function buscarUsuario(idusuario) {
+            axios.get(`${api}/${idusuario}`)
+                .then(response => {
+                   document.getElementById("nomusuario").value=response.data.nomusuario;
+                   document.getElementById("dirusuario").value=response.data.dirusuario;
+                   document.getElementById("celular").value=response.data.celular;
+                   document.getElementById("activo").value=response.data.activo;
+                })
+                .catch(error => alert("No esta"));
+        } 
+
+        function crearUsuario() {
+            const idusuario = document.getElementById("idusuario").value;
+            const nomusuario = document.getElementById("nomusuario").value;
+            const dirusuario = document.getElementById("dirusuario").value;
+            const celular = document.getElementById("celular").value;
+            const activo = document.getElementById("activo").value;
+            
+            axios.post(api, { idusuario, nomusuario,dirusuario,celular,activo })
+                .then(() => getUsuarios())
+                .catch(error => console.error("Error al agregar usuario:", error));
+        }
+
+        function eliminarUsuario(idusuario) {
+            if (confirm("¿Estás seguro de que quieres eliminar este usuario? ")) {
+                axios.delete(`${api}/${idusuario}`)
+                    .then(() => getUsuarios())
+                    .catch(error => console.error("Error al eliminar usuario:", error));
+                }
+        }
+        // Cargar los usuarios al inicio
+        getUsuarios();
+    </script>
+    
+</body>
+</html>
